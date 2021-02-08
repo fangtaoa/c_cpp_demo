@@ -422,32 +422,151 @@ int main()
 
 
 
+## 4.4.铁律4
+
+**指针做函数参数是指针存在的最大意义**
+
+指针的输入和输出:
+
+* 输入: 主调函数分配内存, 传给被调函数
+* 输出: 被调函数分配内存, 并把地址返回给主调函数
 
 
-## 4.3.不断修改指针变量易犯错误
 
-1.在一个函数中的场景:
+<img src="./images/指针输入输出特性.png" width="600px">
+
+
+
+
+
+
+
+# 5.二级指针
+
+## 5.1.二级指针3种模型
+
+**第一种模型**: `char *buf[]`
 
 ```c
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-
-
-int main()
+int sort_array_v1(char **p_array, int len)
 {
-  char *p, *p_head = NULL;
-  p_head = p = (char*)malloc(100);
-  strcpy(p, "1234567890");
+  int i=0, j=0;
+  char *p_tmp = NULL;
+  for(; i<len; i++)
+  {
+    for(j=i+1; j<len; j++)
+    {
+      if(strcmp(p_array[i], p_array[j]) > 0)
+      {
+        p_tmp = p_array[i];
+        p_array[i] = p_array[j];
+        p_array[j] = p_tmp;
+      }
+    }
+  }
+}
 
-  p = p+3; // 修改指针指向
-  *p = 'a';
-  printf("p: %s\n", p);
-  free(p_head); // 释放的内存空间必须是通过首地址
-  p_head=NULL;
-  p=NULL;
+void main()
+{
+    // 1.二级指针第1种模型: char *buf[]
+    // buf是一个数组, 数组中的元素是一个指向char类型的指针
+    char *buf[] = {"aaa", "ccc", "bbb", "eee", "ddd"};
+    sort_array_v1(buf)    
 }
 ```
+
+<img src="./images/2级指针第1种模型.png" width="800px">
+
+
+
+
+
+
+
+**第2种模型**: `char buf[][]`
+
+```c
+int sort_array_v2(char buf_array[][30], int len)
+{
+  int i=0, j=0;
+  char tmp_buf[30] = {0};
+  for(; i<len; i++)
+  {
+    for(j=i+1; j<len; j++)
+    {
+      if(strcmp(buf_array[i], buf_array[j]) > 0)
+      {
+          strcpy(tmp_buf, buf_array[i]);
+          strcpy(buf_array[i], buf_array[j]);
+          strcpy(buf_array[j], tmp_buf);
+      }
+    }
+  }
+}
+
+void main()
+{
+    // 2.二级指针第2种模型: char buf[][]
+    char buf[10][30] = {"aaa", "ccc", "bbb", "eee", "ddd"};
+    sort_array_v2(buf)    
+}
+```
+
+<img src="./images/2级指针第2种模型.png" width="800px">
+
+
+
+**第3种模型**:`char **p_array = (char**)malloc(100*sizeof(char*))`
+
+```c
+int sort_array_v3(char **p_array, int len)
+{
+  int i=0, j=0;
+  char *p_tmp = NULL;
+  for(; i<len; i++)
+  {
+    for(j=i+1; j<len; j++)
+    {
+      if(strcmp(p_array[i], p_array[j]) > 0)
+      {
+        p_tmp = p_array[i];
+        p_array[i] = p_array[j];
+        p_array[j] = p_tmp;
+      }
+    }
+  }
+}
+
+void main()
+{
+    // 3.二级指针第3种模型: char **buf
+    char **p_array = (char**)malloc(100*sizeof(char*));
+    p_array[0] = (char*)malloc(12*sizeof(char));
+    p_array[1] = (char*)malloc(12*sizeof(char));
+    p_array[2] = (char*)malloc(12*sizeof(char));
+    p_array[3] = (char*)malloc(12*sizeof(char));
+    
+    strcpy(p_array[0], "aaaa");
+    strcpy(p_array[1], "cccc");
+    strcpy(p_array[2], "bbbb");
+    strcpy(p_array[3], "dddd");
+    
+    sort_array_v3(p_array, 4);
+    
+    for(i=0; i<4; i++)
+    {
+        if(p_array[i] != NULL)
+        {
+            free(p_array[i]);
+            p_array[i]=NULL;
+        }
+    }
+}
+```
+
+
+
+<img src="./images/2级指针第3种模型.png" width="800px">
 
 
 
@@ -455,7 +574,7 @@ int main()
 
 # 5.指针与数组
 
-## 5.1.数组和指针相同的规则
+## 5.1.数组和指针的关系
 
 数组和指针的关系：
 
@@ -465,7 +584,7 @@ int main()
 
 **注意**： 数组和指针在编译器编译时是不同的， 在运行时的表示形式也是不同的。对编译器而言：
 
-* 一个数组就是一个地址
+* 一个数组就是一个地址, 数组名是不能进行++/--操作的, 是一个**常量指针**, 因为编译器需要通过数组名去释放内存
 * 一个指针就是一个地址的地址
 
 **数组和指针不相等的情况下， 定义和声明必须匹配。如果定义了一个数组， 在其他文件对他进行声明时也必须把它声明为数组， 指针也是如此。**
@@ -712,3 +831,70 @@ int trim_space(const char *src, char *dest)
 ```
 **易犯错误**：容易修改指针的指向
 <img src="./images/拷贝字符串易犯错误.png" width="800px">
+
+
+
+
+
+## 5.4.get_value_by_key
+
+```c
+int get_value_by_key(const char *str /*in*/, char *key /*in*/, char *value /*out*/)
+{
+  int ret_val = 0;
+  int i=0;
+  if (str == NULL || key == NULL ||  value == NULL)
+  {
+    ret_val = -1;
+    printf("func get_value_by_key() error: (str == NULL || key == NULL ||  value == NULL)\n");
+    return ret_val;
+  }
+  char *str_ptr = str;
+  char *key_ptr = NULL;
+  char *new_key_ptr = NULL;
+  char *value_ptr = value;
+  key_ptr = (char*)malloc(100);
+  new_key_ptr = (char*)malloc(100);
+
+  while(*str_ptr != '=')
+  {
+    // malloc开辟的内存空空间， 必须通过首地址赋值
+    key_ptr[i] = *str_ptr;
+    i++;
+    str_ptr++;
+  } 
+  printf("key ptr: [%s]\n", key_ptr);
+  ret_val = trim_space(key_ptr, new_key_ptr); 
+  // strcpy(new_key_ptr, key_ptr); 
+  printf("new key: [%s]\n", new_key_ptr);
+  if (ret_val != 0)
+  {
+    printf("func get_value_by_key() error: %d\n", ret_val);
+    return ret_val;
+  }
+  
+  ret_val = strcmp(new_key_ptr, key);
+  if (ret_val != 0)
+  {
+    printf("func get_value_by_key() error: %s != %s\n", new_key_ptr, key);
+    return ret_val;
+  }
+  ret_val = trim_space(++str_ptr, value);
+  if (ret_val != 0)
+  {
+    printf("func get_value_by_key() error: value is not found by [%s]\n", key);
+    return ret_val;
+  }
+
+  printf("str: [%s], key: [%s], value: [%s]\n", str, key, value);
+
+  free(key_ptr); 
+  free(new_key_ptr); 
+  key_ptr=NULL;
+  new_key_ptr=NULL;
+
+  return ret_val;
+
+}
+```
+

@@ -29,6 +29,7 @@ void main()
 
   arr1[1] = 3;
   *arr1 = 3;
+  //arr1++; // lvalue required as increment operand
   //arr1 = arr2; // compiler error: assignment to expression with array type
   f1(arr1);
   f2(arr1);

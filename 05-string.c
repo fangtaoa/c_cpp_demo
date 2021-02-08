@@ -61,6 +61,7 @@ int trim_space(const char *src, char *dest)
       break;
     src_end_ptr--;
   }
+  printf("src_end_ptr - src_begin_ptr: %d\n", src_end_ptr - src_begin_ptr);
   while (src_begin_ptr != src_end_ptr)
   {
     *dest_ptr++=*src_begin_ptr++;

@@ -2,7 +2,7 @@ CC=gcc
 FLAG=-g -o
 
 TARGET=demo
-SOURCE=06-array.c
+SOURCE=07-multi_pointer.c
 
 all:$(TARGET)
 
