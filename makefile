@@ -2,7 +2,7 @@ CC=gcc
 FLAG=-g -o
 
 TARGET=demo
-SOURCE=05-string.c
+SOURCE=06-array.c
 
 all:$(TARGET)
 

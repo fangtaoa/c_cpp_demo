@@ -119,8 +119,22 @@ int main()
 
 
 ## 2.2.变量的本质
+**变量的声明**： 
+`声明器(declarator)`： 由标识符和它组合在一起的任何指针， 函数括号， 数组下标等
 
-**本质 **: 是(一段连续)内存空间的别名, 内存空间的标号, 也就是门牌号,  通过它读写内存空间.
+**解析声明方式**
+
+<img src="./images/解析声明的方式.png" width="800px">
+
+`char *const *(*next)()`:
+    next是一个指针， 它指向一个函数， 该函数返回一个指针， 指向一个类型为char的const指针
+
+`char *(*c[10])(int **p)`:
+    c是一个有10个元素的数组， 数组每一个元素是一个指针， 该指针指向一个函数，函数有一个指向int类型的指针做参数， 并返回一个指向char类型的指针
+
+
+
+**变量本质 **: 是(一段连续)内存空间的别名, 内存空间的标号, 也就是门牌号,  通过它读写内存空间.
 
 修改变量的方法:
 
@@ -439,6 +453,96 @@ int main()
 
 
 
+# 5.指针与数组
+
+## 5.1.数组和指针相同的规则
+
+数组和指针的关系：
+
+<img src="./images/数组与指针的关系.png" width="800px">
+
+
+
+**注意**： 数组和指针在编译器编译时是不同的， 在运行时的表示形式也是不同的。对编译器而言：
+
+* 一个数组就是一个地址
+* 一个指针就是一个地址的地址
+
+**数组和指针不相等的情况下， 定义和声明必须匹配。如果定义了一个数组， 在其他文件对他进行声明时也必须把它声明为数组， 指针也是如此。**
+
+
+
+**规则1**：
+
+**表达式中的数组名就是指针**： `a[i] ---> *(a+i)`, 在编译时， 对于数组表达式， 编译器会把`a[i]`编译成 `*(a+i)`的形式
+
+* 在表达式中， 指针和数组是可以互换的， 因为在编译器里的最终形式都是指针， 并且都可以进行区下标操作。
+* 编译器自动把下标值的步长调整到数组元素的大小。对起始地址执行加法操作前， 编译器会负责计算每次增加的步长。
+* 每个指针只能指向一种类型的原因就是：编译器需要知道对指针进行解除引用操作时应该取几个字节， 以及每个下标的步长是几个字节。
+
+**规则2**：
+
+**C语言把数组下标作为指针的偏移量**
+
+C语言把数组下标改写成指针偏移量的根本原因是**指针和偏移量是底层硬件所使用的基本类型**。
+
+
+
+**规则3**：
+
+**作为函数参数的数组名等同于指针**
+
+更倾向于把函数参数定义为指针， 因为这是编译器内部使用的方式。
+
+**数组名是可能被修改的左值， 因此这只能在指针里完成。**
+
+```c
+#include <stdio.h>
+
+
+int arr1[100];
+int arr2[100];
+
+void f1(int *ptr)
+{
+  ptr[1] = 3;
+  *ptr = 3;
+  printf("ptr[0]: [%d], ptr[1]: [%d]\n", ptr[0], ptr[1]);
+  ptr = arr2;
+  printf("ptr[0]: [%d], ptr[1]: [%d]\n", ptr[0], ptr[1]);
+
+}
+
+void f2(int arr[])
+{
+  arr[1] = 3;
+  *arr = 3;
+  printf("arr[0]: [%d], arr[1]: [%d]\n", *arr, *arr++);
+  arr = arr2; // arr实际是一个指针
+  printf("arr[0]: [%d], arr[1]: [%d]\n", *arr, *arr++);
+
+}
+
+void main()
+{
+
+  arr1[1] = 3;
+  *arr1 = 3;
+  //arr1 = arr2; // compiler error: assignment to expression with array type
+  f1(arr1);
+  f2(arr1);
+
+}
+```
+
+
+
+
+
+
+
+
+
 
 
 # 5.字符串操作
@@ -560,3 +664,51 @@ int main()
 
 ```
 
+
+## 5.3.trim_space
+截取字符串首尾两端的空格，并返回新生成的字符串.
+
+```c
+// 去除字符串首尾的空格, 并返回新的字符串
+int trim_space(const char *src, char *dest)
+{
+  int ret_val = 0;
+  char *src_begin_ptr = src;
+  char *src_end_ptr = src + strlen(src) -1;
+  char *dest_ptr = dest;
+  if (src == NULL || dest ==  NULL)
+  {
+    ret_val = -1;
+    printf("func trim_space() error: (src_ptr == NULL || dest_ptr ==  NULL)");
+    return ret_val;
+  }
+  if(*src_begin_ptr != ' ' && *src_end_ptr != ' ') 
+  {
+    // dest = src; // 改变了dest的地址， 此时dest指向src的内存空间
+    strcpy(dest, src);
+    return ret_val;
+  }
+
+  while(*src_begin_ptr != '\0')
+  {
+    if (*src_begin_ptr != ' ')
+      break;
+    src_begin_ptr++;
+  }
+  while(*src_end_ptr != '\0')
+  {
+    if(*src_end_ptr != ' ')
+      break;
+    src_end_ptr--;
+  }
+  while (src_begin_ptr != src_end_ptr)
+  {
+    *dest_ptr++=*src_begin_ptr++;
+  } 
+  *dest_ptr = *src_end_ptr;
+  return ret_val;
+}
+
+```
+**易犯错误**：容易修改指针的指向
+<img src="./images/拷贝字符串易犯错误.png" width="800px">
