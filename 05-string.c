@@ -43,20 +43,23 @@ int trim_space(const char *src, char *dest)
   }
   if(*src_begin_ptr != ' ' && *src_end_ptr != ' ') 
   {
-    dest = src;
+    // dest = src; // 改变了dest的地址， 此时dest指向src的内存空间
+    strcpy(dest, src);
     return ret_val;
   }
 
   printf("src_begin_ptr: [%s]\n", src_begin_ptr);
-  while(*src_begin_ptr++ != '\0')
+  while(*src_begin_ptr != '\0')
   {
     if (*src_begin_ptr != ' ')
       break;
+    src_begin_ptr++;
   }
-  while(*src_end_ptr-- != '\0')
+  while(*src_end_ptr != '\0')
   {
     if(*src_end_ptr != ' ')
       break;
+    src_end_ptr--;
   }
   while (src_begin_ptr != src_end_ptr)
   {
@@ -109,13 +112,14 @@ int get_value_by_key(const char *str /*in*/, char *key /*in*/, char *value /*out
 
   while(*str_ptr != '=')
   {
+    // malloc开辟的内存空空间， 必须通过首地址赋值
     key_ptr[i] = *str_ptr;
     i++;
     str_ptr++;
   } 
   printf("key ptr: [%s]\n", key_ptr);
-  // ret_val = trim_space(key_ptr, new_key_ptr); 
-  strcpy(new_key_ptr, key_ptr); 
+  ret_val = trim_space(key_ptr, new_key_ptr); 
+  // strcpy(new_key_ptr, key_ptr); 
   printf("new key: [%s]\n", new_key_ptr);
   if (ret_val != 0)
   {
@@ -129,13 +133,14 @@ int get_value_by_key(const char *str /*in*/, char *key /*in*/, char *value /*out
     printf("func get_value_by_key() error: %s != %s\n", new_key_ptr, key);
     return ret_val;
   }
-
-  ret_val = trim_space(str_ptr++, value);
+  ret_val = trim_space(++str_ptr, value);
   if (ret_val != 0)
   {
     printf("func get_value_by_key() error: value is not found by [%s]\n", key);
     return ret_val;
   }
+
+  printf("str: [%s], key: [%s], value: [%s]\n", str, key, value);
 
   free(key_ptr); 
   free(new_key_ptr); 
@@ -160,12 +165,17 @@ int main()
 
     printf("\n=========trim_space()===========\n"); 
 
-    char *str2 = "      abcde dkafjkdaf dajkff      ";
+    char *str2 = NULL;
     char *dest = NULL;
+    str2 = (char*)malloc(100);
     dest = (char*)malloc(100);
+    memset(str2, 0, sizeof(str2));
+    strcpy(str2, "      abcde dkafjkdaf dajkff      ");
+    
     ret = trim_space(str2, dest);
     if (ret == 0)
     {
+      printf("str2: [%s]\n", str2);
       printf("dest: [%s]\n",  dest);
     }
 
@@ -183,20 +193,22 @@ int main()
     
 
     printf("\n========get_value_by_key()============\n"); 
-    char *str4 = "key1=value1";
+    char *str4 = "  key1    =value1 ";
     char *key = "key1";
     char *value = NULL;
     value = (char*)malloc(32);
     
     ret = get_value_by_key(str4, key, value);
     if (ret == 0)
-      printf("str: [%s], key: [%s], value: [%s]\n", str4, key, value);
+      ;//printf("str: [%s], key: [%s], value: [%s]\n", str4, key, value);
 
+    free(str2);
     free(dest);
     free(even_str);
     free(odd_str);
     free(value);
 
+    str2=NULL;
     dest=NULL;
     even_str=NULL;
     odd_str=NULL;
