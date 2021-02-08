@@ -155,7 +155,7 @@ int main()
 
 
 
-<img src="D:\学习笔记\images\内存四区概述.png" width="600px">
+<img src=".\images\内存四区概述.png" width="600px">
 
 * **栈区**: 也称为临时区, 由编译器自动分配释放, 存放函数的参数值, 局部变量的值等;
 * **堆区**: 一般由程序员动态申请与释放, 若不手动释放, 可能会出现内存溢出问题
@@ -218,7 +218,7 @@ int main()
 
 ## 3.2.OS如何管理函数的调用
 
-<img src="D:\学习笔记\images\函数调用流程.png" width="800px">
+<img src=".\images\函数调用流程.png" width="800px">
 
 **问题**:
 
