@@ -38,7 +38,7 @@ int sort_array(char **p_array, int len)
 }
 
 
-int split_str(const char *str, char **p_array, int *rows)
+int split_str(const char *str, char **p_array, char ch, int *rows)
 {
   int i =0, ret_val=0;
   char *str_ptr = str;
@@ -62,9 +62,9 @@ int split_str(const char *str, char **p_array, int *rows)
     printf("func split_str() error: (tmp_ptr == NULL)");
     return ret_val;
   }
-  while(*str_ptr!= '\0')
+  while(*str_ptr != '\0')
   {
-    if (*str_ptr == ',')
+    if (*str_ptr == ch)
     {
       p_array[i] = (char*)malloc(str_ptr-tmp_ptr);      
       strncpy(p_array[i], tmp_ptr, str_ptr-tmp_ptr); 
@@ -88,14 +88,16 @@ int main()
   // 2. 二级指针的第2种内存模型
   char buf2[10][30] = {0};
   // 3. 二级指针的第3种内存模型
-  char **buf3 = (char**)malloc(10*sizeof(char **));
+  char **buf3 = (char**)malloc(100*sizeof(char *));
   char *str="aaa,bbbb,cccc,dddd";
   int rows=0;
-  ret =split_str(str, buf3, &rows);
+  char ch = ',';
+  ret =split_str(str, buf3, ch, &rows);
   if(ret != 0)
   {
     printf("func split_str() error: %d\n", ret);
-    return ret;
+    // return ret;
+    goto end;
 
   }
   print_array(buf3, rows); 
@@ -108,6 +110,8 @@ int main()
       buf3[i]=NULL;
     }
   }
+
+end:
   free(buf3);
   buf3=NULL;
   return ret;
