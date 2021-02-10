@@ -37,6 +37,55 @@ int sort_array(char **p_array, int len)
   }
 }
 
+int get_mem(char **p_array, int *nums)
+{
+  int ret_val = 0;
+  if (p_array != NULL)
+  {
+   ret_val = -1;
+   printf("func get_mem() error: (p_array != NULL)\n"); 
+   return ret_val;
+  }
+  if (nums == NULL)
+  {
+   ret_val = -1;
+   printf("func get_mem() error: (nums == NULL)\n"); 
+   return ret_val;
+  }
+
+  p_array = (char**)malloc(100*sizeof(char*));
+  return ret_val; 
+}
+
+int free_mem(char **p_array, int *nums)
+{
+  int i = 0, ret_val = 0;
+  if (p_array == NULL)
+  {
+    ret_val = -1;
+    printf("func free_mem() error: if (p_array == NULL)\n");
+    return ret_val;
+  }
+  if (nums == NULL)
+  {
+    ret_val = -1;
+    printf("func free_mem() error: if (nums == NULL)\n");
+    return ret_val;
+  }
+  if(p_array != NULL)
+  {
+    for(i=0; i<*nums; i++)
+    {
+      free(p_array[i]);
+      p_array[i] = NULL;
+    }
+    free(p_array);
+    p_array = NULL;
+  }
+  return ret_val;
+
+}
+
 
 int split_str(const char *str, char **p_array, char ch, int *rows)
 {
@@ -73,9 +122,15 @@ int split_str(const char *str, char **p_array, char ch, int *rows)
     } 
     str_ptr++;
   }
-  p_array[i] = (char*)malloc(str_ptr-tmp_ptr);
-  strncpy(p_array[i], tmp_ptr, str_ptr-tmp_ptr);
-  *rows = ++i;
+  if (strlen(tmp_ptr) != 0)
+  {
+    p_array[i] = (char*)malloc(str_ptr-tmp_ptr);
+    strncpy(p_array[i], tmp_ptr, str_ptr-tmp_ptr);
+    *rows = ++i;
+  } else
+  {
+    *rows = i;
+  }
   return ret_val;
 
 }
@@ -89,7 +144,7 @@ int main()
   char buf2[10][30] = {0};
   // 3. 二级指针的第3种内存模型
   char **buf3 = (char**)malloc(100*sizeof(char *));
-  char *str="aaa,bbbb,cccc,dddd";
+  char *str="aaa,bbbb,cccc,dddd,e";
   int rows=0;
   char ch = ',';
   ret =split_str(str, buf3, ch, &rows);
@@ -102,19 +157,25 @@ int main()
   }
   print_array(buf3, rows); 
   printf("rows: %d\n", rows);
-  for (i=0;i<rows;i++)
-  {
-    if(buf3[i] != NULL)
-    {
-      free(buf3[i]);
-      buf3[i]=NULL;
-    }
-  }
+  // for (i=0;i<rows;i++)
+  // {
+  //   if(buf3[i] != NULL)
+  //   {
+  //     free(buf3[i]);
+  //     buf3[i]=NULL;
+  //   }
+  // }
+  // ret = free_mem(buf3, &rows);
+  // return ret;
+  goto end;
 
 end:
-  free(buf3);
-  buf3=NULL;
-  return ret;
+  ret = free_mem(buf3, &rows);
+  if (ret != 0)
+  {
+    printf("func free_mem() error: %d\n", ret);
+    return ret;
 
+  }
 }
 
